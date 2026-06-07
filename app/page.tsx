@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+const API_BASE_URL = "https://car-damage-api.onrender.com";
+
 type Detection = {
   class_id: number;
   class_name: string;
@@ -77,7 +79,6 @@ export default function Home() {
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const selected = e.target.files?.[0] || null;
-
     setFile(selected);
     setResult(null);
     setImageUrl("");
@@ -96,7 +97,7 @@ export default function Home() {
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await fetch("https://car-damage-api.onrender.com/predict", {
+      const response = await fetch(`${API_BASE_URL}/predict`, {
         method: "POST",
         body: formData,
       });
@@ -108,7 +109,7 @@ export default function Home() {
       const data: PredictionResult = await response.json();
 
       setResult(data);
-      setImageUrl(`http://127.0.0.1:8000${data.annotated_image_url}`);
+      setImageUrl(`${API_BASE_URL}${data.annotated_image_url}`);
     } catch (error) {
       console.error(error);
       alert(
