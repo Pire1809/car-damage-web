@@ -49,6 +49,8 @@ export default function Home() {
       automatedSummary: "Automated inspection summary",
       manualReview: "Manual review is recommended.",
       nav: ["YOLO Detection", "FastAPI", "Computer Vision"],
+      runAnalysis: "Run analysis to see detections",
+      badge: "AI-powered vehicle damage inspection",
     },
     es: {
       title: "Detecta daños vehiculares en segundos.",
@@ -74,8 +76,36 @@ export default function Home() {
       automatedSummary: "Resumen automático de inspección",
       manualReview: "Se recomienda revisión manual.",
       nav: ["Detección YOLO", "FastAPI", "Visión Computacional"],
+      runAnalysis: "Ejecuta el análisis para ver detecciones",
+      badge: "Inspección vehicular impulsada por IA",
     },
   };
+
+  const damageLabels = {
+    en: {
+      dent: "Dent",
+      scratch: "Scratch",
+      crack: "Crack",
+      glass_shatter: "Glass Shatter",
+      lamp_broken: "Broken Lamp",
+      tire_flat: "Flat Tire",
+    },
+    es: {
+      dent: "Abolladura",
+      scratch: "Rayón",
+      crack: "Grieta",
+      glass_shatter: "Vidrio Quebrado",
+      lamp_broken: "Lámpara Rota",
+      tire_flat: "Llanta Ponchada",
+    },
+  };
+
+  function getDamageLabel(label: string) {
+    return (
+      damageLabels[language][label as keyof typeof damageLabels["en"]] ||
+      label.replace("_", " ")
+    );
+  }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const selected = e.target.files?.[0] || null;
@@ -194,7 +224,7 @@ export default function Home() {
         <section className="grid lg:grid-cols-2 gap-10 items-center mb-12">
           <div>
             <div className="inline-flex mb-6 rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-2 text-sm text-blue-300">
-              AI-powered vehicle damage inspection
+              {t[language].badge}
             </div>
 
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
@@ -272,7 +302,7 @@ export default function Home() {
                     key={label}
                     className="rounded-full bg-zinc-800 px-3 py-1 text-sm text-zinc-300"
                   >
-                    {label.replace("_", " ")}
+                    {getDamageLabel(label)}
                   </span>
                 ))}
               </div>
@@ -309,7 +339,7 @@ export default function Home() {
                 />
               ) : (
                 <div className="h-[400px] rounded-2xl border border-dashed border-zinc-700 flex items-center justify-center text-zinc-500">
-                  Run analysis to see detections
+                  {t[language].runAnalysis}
                 </div>
               )}
             </div>
@@ -375,7 +405,7 @@ export default function Home() {
                 >
                   <div className="flex justify-between items-center mb-4">
                     <span className="capitalize text-lg font-semibold">
-                      {item.class_name.replace("_", " ")}
+                      {getDamageLabel(item.class_name)}
                     </span>
 
                     <span className="text-blue-400 font-bold">
