@@ -16,8 +16,14 @@ type RepairEstimate = {
   max: number;
   currency: string;
   severity: string;
-  summary: string;
-  disclaimer: string;
+  summary: {
+    en: string;
+    es: string;
+  };
+  disclaimer: {
+    en: string;
+    es: string;
+  };
   multipliers?: {
     brand: number;
     vehicle_type: number;
@@ -428,7 +434,7 @@ export default function Home() {
       : 0;
 
   const aiSummary =
-    result?.repair_estimate?.summary ||
+    result?.repair_estimate?.summary?.[language] ||
     (language === "en"
       ? "Upload a vehicle image to generate an AI inspection summary."
       : "Sube una imagen del vehículo para generar un resumen de inspección con IA.");
@@ -739,7 +745,7 @@ export default function Home() {
             </div>
 
             <p className="text-xs text-zinc-500 mt-5">
-              {result.repair_estimate.disclaimer}
+              {result.repair_estimate.disclaimer[language]}
             </p>
           </section>
         )}
