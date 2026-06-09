@@ -27,7 +27,7 @@ type RepairEstimate = {
 };
 
 type PredictionResult = {
-  vehicle: {
+  vehicle?: {
     make: string;
     model: string;
     year: number | null;
@@ -35,7 +35,7 @@ type PredictionResult = {
   };
   detections: Detection[];
   annotated_image_url: string;
-  repair_estimate: RepairEstimate;
+  repair_estimate?: RepairEstimate;
 };
 
 const VEHICLE_LOVS: Record<string, string[]> = {
@@ -114,7 +114,14 @@ const VEHICLE_LOVS: Record<string, string[]> = {
     "Colorado",
     "Trailblazer",
   ],
-  Dodge: ["Charger", "Challenger", "Durango", "Hornet", "Journey", "Grand Caravan"],
+  Dodge: [
+    "Charger",
+    "Challenger",
+    "Durango",
+    "Hornet",
+    "Journey",
+    "Grand Caravan",
+  ],
   Jeep: [
     "Wrangler",
     "Grand Cherokee",
@@ -143,7 +150,16 @@ const VEHICLE_LOVS: Record<string, string[]> = {
     "ID.4",
     "Arteon",
   ],
-  Mazda: ["Mazda3", "Mazda6", "CX-3", "CX-30", "CX-5", "CX-50", "CX-9", "MX-5 Miata"],
+  Mazda: [
+    "Mazda3",
+    "Mazda6",
+    "CX-3",
+    "CX-30",
+    "CX-5",
+    "CX-50",
+    "CX-9",
+    "MX-5 Miata",
+  ],
   Tesla: ["Model 3", "Model Y", "Model S", "Model X", "Cybertruck"],
   BMW: [
     "2 Series",
@@ -204,6 +220,8 @@ export default function Home() {
     return VEHICLE_LOVS[make] || [];
   }, [make]);
 
+  const hasRepairEstimate = Boolean(result?.repair_estimate);
+
   const t = {
     en: {
       title: "Detect vehicle damage in seconds.",
@@ -244,6 +262,8 @@ export default function Home() {
       chooseType: "Select vehicle type",
       minimum: "Minimum",
       maximum: "Maximum",
+      pendingEstimate:
+        "Repair estimate is not available yet. Make sure the backend was updated and redeployed.",
     },
     es: {
       title: "Detecta daños vehiculares en segundos.",
@@ -284,6 +304,8 @@ export default function Home() {
       chooseType: "Selecciona tipo de vehículo",
       minimum: "Mínimo",
       maximum: "Máximo",
+      pendingEstimate:
+        "El estimado de reparación todavía no está disponible. Asegúrate de que el backend fue actualizado y redeployado.",
     },
   };
 
@@ -325,7 +347,8 @@ export default function Home() {
     );
   }
 
-  function translateSeverity(severity: string) {
+  function translateSeverity(severity?: string) {
+    if (!severity) return "—";
     if (language === "en") return severity;
 
     const map: Record<string, string> = {
@@ -564,7 +587,7 @@ export default function Home() {
               </div>
             </div>
 
-            {result?.repair_estimate && (
+            {hasRepairEstimate && result?.repair_estimate && (
               <div className="mt-6 rounded-2xl bg-blue-500/10 border border-blue-500/20 p-5">
                 <p className="text-sm text-blue-300 mb-2">
                   {t[language].preliminary}
@@ -652,6 +675,12 @@ export default function Home() {
               </h3>
 
               <p className="text-zinc-400 leading-relaxed">{aiSummary}</p>
+
+              {!hasRepairEstimate && (
+                <p className="mt-4 text-sm text-yellow-400">
+                  {t[language].pendingEstimate}
+                </p>
+              )}
             </div>
 
             <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-6">
@@ -660,7 +689,7 @@ export default function Home() {
               </p>
 
               <div className="text-4xl font-bold mb-4">
-                {translateSeverity(result.repair_estimate.severity)}
+                {translateSeverity(result.repair_estimate?.severity)}
               </div>
 
               <button
@@ -673,7 +702,7 @@ export default function Home() {
           </section>
         )}
 
-        {result && (
+        {hasRepairEstimate && result?.repair_estimate && (
           <section className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 mb-10">
             <div className="flex items-center justify-between mb-6">
               <div>
@@ -727,6 +756,14 @@ export default function Home() {
                 {t[language].complete}
               </span>
             </div>
+
+            {result.detections.length === 0 && (
+              <p className="text-zinc-400">
+                {language === "en"
+                  ? "No visible damage was detected."
+                  : "No se detectó daño visible."}
+              </p>
+            )}
 
             <div className="grid md:grid-cols-3 gap-4">
               {result.detections.map((item, index) => (
