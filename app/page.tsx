@@ -368,14 +368,53 @@ export default function Home() {
     return map[severity] || severity;
   }
 
+  function buildSpanishSummaryFromEstimate() {
+    if (!result?.repair_estimate) return "";
+
+    return (
+      `El sistema detectó ${result.detections.length} posible(s) área(s) de daño. ` +
+      `La severidad estimada es ${translateSeverity(result.repair_estimate.severity)}. ` +
+      `El rango estimado de reparación es de $${result.repair_estimate.min.toLocaleString()} a $${result.repair_estimate.max.toLocaleString()} USD.`
+    );
+  }
+
   function getLocalizedText(value: LocalizedText | undefined) {
     if (!value) return "";
 
     if (typeof value === "string") {
+      if (language === "es") {
+        return buildSpanishSummaryFromEstimate();
+      }
+
       return value;
     }
 
     return value[language] || value.en || value.es || "";
+  }
+
+  function getDisclaimerText() {
+    const defaultSpanishDisclaimer =
+      "Este es un estimado preliminar generado por IA y no representa una cotización oficial de reparación. El costo final puede variar según la ubicación, tarifa de mano de obra, disponibilidad de piezas, igualación de pintura, daños ocultos, necesidad de calibración y precios del taller.";
+
+    const defaultEnglishDisclaimer =
+      "This is an AI-generated preliminary estimate and not an official repair quote. Final repair cost may vary by location, labor rate, parts availability, paint matching, hidden damage, calibration needs, and repair shop pricing.";
+
+    if (!result?.repair_estimate?.disclaimer) {
+      return language === "es" ? defaultSpanishDisclaimer : defaultEnglishDisclaimer;
+    }
+
+    if (typeof result.repair_estimate.disclaimer === "string") {
+      return language === "es"
+        ? defaultSpanishDisclaimer
+        : result.repair_estimate.disclaimer;
+    }
+
+    return (
+      result.repair_estimate.disclaimer[language] ||
+      result.repair_estimate.disclaimer.en ||
+      result.repair_estimate.disclaimer.es ||
+      (language === "es" ? defaultSpanishDisclaimer : defaultEnglishDisclaimer)
+    );
   }
 
   function handleMakeChange(value: string) {
@@ -450,7 +489,7 @@ export default function Home() {
       ? "Upload a vehicle image to generate an AI inspection summary."
       : "Sube una imagen del vehículo para generar un resumen de inspección con IA.");
 
-  const disclaimerText = getLocalizedText(result?.repair_estimate?.disclaimer);
+  const disclaimerText = getDisclaimerText();
 
   return (
     <main className="min-h-screen bg-[#050505] text-white overflow-hidden">
