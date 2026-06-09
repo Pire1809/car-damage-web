@@ -11,19 +11,20 @@ type Detection = {
   box: number[];
 };
 
+type LocalizedText =
+  | string
+  | {
+      en: string;
+      es: string;
+    };
+
 type RepairEstimate = {
   min: number;
   max: number;
   currency: string;
   severity: string;
-  summary: {
-    en: string;
-    es: string;
-  };
-  disclaimer: {
-    en: string;
-    es: string;
-  };
+  summary: LocalizedText;
+  disclaimer: LocalizedText;
   multipliers?: {
     brand: number;
     vehicle_type: number;
@@ -367,6 +368,16 @@ export default function Home() {
     return map[severity] || severity;
   }
 
+  function getLocalizedText(value: LocalizedText | undefined) {
+    if (!value) return "";
+
+    if (typeof value === "string") {
+      return value;
+    }
+
+    return value[language] || value.en || value.es || "";
+  }
+
   function handleMakeChange(value: string) {
     setMake(value);
     setModelName("");
@@ -434,10 +445,12 @@ export default function Home() {
       : 0;
 
   const aiSummary =
-    result?.repair_estimate?.summary?.[language] ||
+    getLocalizedText(result?.repair_estimate?.summary) ||
     (language === "en"
       ? "Upload a vehicle image to generate an AI inspection summary."
       : "Sube una imagen del vehículo para generar un resumen de inspección con IA.");
+
+  const disclaimerText = getLocalizedText(result?.repair_estimate?.disclaimer);
 
   return (
     <main className="min-h-screen bg-[#050505] text-white overflow-hidden">
@@ -744,9 +757,9 @@ export default function Home() {
               </div>
             </div>
 
-            <p className="text-xs text-zinc-500 mt-5">
-              {result.repair_estimate.disclaimer[language]}
-            </p>
+            {disclaimerText && (
+              <p className="text-xs text-zinc-500 mt-5">{disclaimerText}</p>
+            )}
           </section>
         )}
 
